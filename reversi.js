@@ -1,43 +1,67 @@
-﻿window.onload = init;
+﻿function Cell(x, y) {
+    this.x = x;
+    this.y = y;
+    this.chip = null;
+}
+
+Cell.prototype.hasChip = function () {
+    if (this.chip == null) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function Chip() {
+    this.side = undefined;
+}
+
+Chip.prototype.reverse = function () {
+    if (this.side === "white") {
+        this.side = "black";
+    } else {
+        this.side = "white";
+    }
+}
+
+Chip.prototype.setWhite = function () {
+    this.side = "white";
+}
+
+Chip.prototype.setBlack = function () {
+    this.side = "black";
+}
+
+window.onload = init;
 
 function init() {
-    setInitialPosition();
+    var Board = createBoard();
 
-    var tds = document.getElementsByTagName("td");
-    for(var i = 0; i < tds.length; i++) {
-        tds[i].onclick = addChip;
-    }
+    setInitialPositionOn(Board);
 }
 
-function addChip(obj) {
-    var tdxx = obj.target;
-    if (tdxx.hasChildNodes() == false) {
-        var img = document.createElement("img");
-        img.src = "images/white.gif";
-        img.alt = "white";
-        tdxx.appendChild(img);
+function createBoard() {
+    var boardSize = 8;
+    var Board = new Array(boardSize);
+    for (var i = 0; i < boardSize; i++) {
+        Board[i] = new Array(boardSize);
     }
+
+    for (var i = 0; i < boardSize; i++) {
+        for (var j = 0; j < boardSize; j++) {
+            Board[i][j] = new Cell(i, j);
+        }
+    }
+    return Board;
 }
 
-function setInitialPosition() {
-    var td1 = document.getElementById("33");
-    var td2 = document.getElementById("34");
-    var td3 = document.getElementById("43");
-    var td4 = document.getElementById("44");
-    var img1 = document.createElement("img");
-    var img2 = document.createElement("img");
-    var img3 = document.createElement("img");
-    var img4 = document.createElement("img");
-    img1.src = "images/white.gif";
-    img1.alt = "white";
-    img2.src = "images/black.gif";
-    img2.alt = "black";
-    img3.src = "images/black.gif";
-    img3.alt = "black";
-    img4.src = "images/white.gif";
-    img4.alt = "white";
-    td1.appendChild(img1);
-    td2.appendChild(img2);
-    td3.appendChild(img3);
-    td4.appendChild(img4);
+function setInitialPositionOn(Board) {
+    Board[3][3].chip = new Chip();
+    Board[3][3].chip.setWhite();
+    Board[4][4].chip = new Chip();
+    Board[4][4].chip.setWhite();
+    Board[3][4].chip = new Chip();
+    Board[3][4].chip.setBlack();
+    Board[4][3].chip = new Chip();
+    Board[4][3].chip.setBlack();
 }
