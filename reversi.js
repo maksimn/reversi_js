@@ -60,6 +60,20 @@ Board.prototype.getCell = function (i, j) {
     return this.array[i][j];
 }
 
+Board.prototype.makeTurn = function (coords) {
+    var x = parseInt(coords.charAt(0));
+    var y = parseInt(coords.charAt(1));
+    if (this.checkIfTheChipCouldBePutInThisCell(x, y)) {
+        
+    } 
+}
+
+Board.prototype.checkIfTheChipCouldBePutInThisCell = function (x, y) {
+    var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+//    console.log("numOfDirs : " + directions.length);
+    return false;
+}
+
 function View() {
 }
 
@@ -88,12 +102,17 @@ function init() {
     view.renderModel(board);
 
     var tds = document.getElementsByTagName("td");
-    function firstTurn(obj) {
-        console.log("clicked element attribute: " + obj.target.getAttribute("id"));
-    }
 
     for (var i = 0; i < tds.length; i++) {
         tds[i].onclick = firstTurn;
+    }
+
+    function firstTurn(obj) {
+        var coords = obj.target.getAttribute("id");
+        if (coords != null) {
+            board.makeTurn(coords);
+            view.renderModel(board);
+        }
     }
 }
 
