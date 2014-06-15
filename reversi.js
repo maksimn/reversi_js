@@ -64,13 +64,48 @@ Board.prototype.makeTurn = function (coords) {
     var x = parseInt(coords.charAt(0));
     var y = parseInt(coords.charAt(1));
     if (this.checkIfTheChipCouldBePutInThisCell(x, y)) {
-        
+        this.setChip(x, y, "black");
     } 
+}
+
+Board.prototype.setChip = function (x, y, side) {
+    this.array[x][y].chip = new Chip();
+    if(side === "black") {
+        this.array[x][y].chip.setBlack();
+    } else {
+        this.array[x][y].chip.setWhite();
+    }
 }
 
 Board.prototype.checkIfTheChipCouldBePutInThisCell = function (x, y) {
     var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
-//    console.log("numOfDirs : " + directions.length);
+    for (var k = 0; k < directions.length; k++) {
+        var dx = directions[k][0];
+        var dy = directions[k][1];
+        var l = 1;
+        if (x + l * dx >= 0 && x + l * dx < this.size && y + l * dy >= 0 && y + l * dy < this.size) {
+            if (this.array[x + l * dx][y + l * dy].chip != null) {
+                if (this.array[x + l * dx][y + l * dy].chip.side == "white") {
+                    l++;
+                } else {
+                    continue;
+                }
+            }
+        }
+        if (l == 2) {
+            while (x + l * dx >= 0 && x + l * dx < this.size && y + l * dy >= 0 && y + l * dy < this.size) {
+                if (this.array[x + l * dx][y + l * dy].chip != null) {
+                    if (this.array[x + l * dx][y + l * dy].chip.side == "black") {
+                        return true;
+                    } else if (this.array[x + l * dx][y + l * dy].chip.side == "white") {
+                        l++;
+                    } else {
+                        break;
+                    }
+                } else { break; }
+            }
+        }
+    }
     return false;
 }
 
