@@ -32,94 +32,154 @@ Chip.prototype.setBlack = function () {
     this.side = "black";
 }
 
-function Board() {
+function Model() {
+    this.turnNo = 1;
     this.size = 8;
-    this.array = new Array(this.size);
-    for (var i = 0; i < this.array.length; i++) {
-        this.array[i] = new Array(this.size);
+    this.board = new Array(this.size);
+    for (var i = 0; i < this.board.length; i++) {
+        this.board[i] = new Array(this.size);
     }
     for (var i = 0; i < this.size; i++) {
         for (var j = 0; j < this.size; j++) {
-            this.array[i][j] = new Cell(i, j);
+            this.board[i][j] = new Cell(i, j);
         }
     }
 }
 
-Board.prototype.setInitialPositionOfGame = function () {
-    this.array[3][3].chip = new Chip();
-    this.array[3][3].chip.setWhite();
-    this.array[4][4].chip = new Chip();
-    this.array[4][4].chip.setWhite();
-    this.array[3][4].chip = new Chip();
-    this.array[3][4].chip.setBlack();
-    this.array[4][3].chip = new Chip();
-    this.array[4][3].chip.setBlack();
+Model.prototype.setInitialPositionOfGame = function () {
+    this.board[3][3].chip = new Chip();
+    this.board[3][3].chip.setWhite();
+    this.board[4][4].chip = new Chip();
+    this.board[4][4].chip.setWhite();
+    this.board[3][4].chip = new Chip();
+    this.board[3][4].chip.setBlack();
+    this.board[4][3].chip = new Chip();
+    this.board[4][3].chip.setBlack();
 }
 
-Board.prototype.getCell = function (i, j) {
-    return this.array[i][j];
+Model.prototype.getCell = function (i, j) {
+    return this.board[i][j];
 }
 
-Board.prototype.makeTurn = function (coords) {
+Model.prototype.makeTurn = function (coords, color) {
     var x = parseInt(coords.charAt(0));
     var y = parseInt(coords.charAt(1));
-    if (this.checkIfTheChipCouldBePutInThisCell(x, y)) {
-        this.setChip(x, y, "black");
+    if (this.checkIfTheChipCouldBePutInThisCell(x, y, color)) {
+        this.setChip(x, y, color);
+        this.reverseChips(x, y, color);
+        this.turnNo++;
     } 
 }
 
-Board.prototype.setChip = function (x, y, side) {
-    this.array[x][y].chip = new Chip();
+Model.prototype.setChip = function (x, y, side) {
+    this.board[x][y].chip = new Chip();
     if(side === "black") {
-        this.array[x][y].chip.setBlack();
+        this.board[x][y].chip.setBlack();
     } else {
-        this.array[x][y].chip.setWhite();
+        this.board[x][y].chip.setWhite();
     }
 }
 
-Board.prototype.checkIfTheChipCouldBePutInThisCell = function (x, y) {
+Model.prototype.areCoordsValid = function (x, y) {
+    if (x >= 0 && x < this.size && y >= 0 && y < this.size) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+Model.prototype.inverseColor = function (color) {
+    if (color == "black") {
+        return "white";
+    } else {
+        return "black";
+    }
+}
+
+Model.prototype.checkIfTheChipCouldBePutInThisCell = function (x, y, color) {
     var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
     for (var k = 0; k < directions.length; k++) {
         var dx = directions[k][0];
         var dy = directions[k][1];
         var l = 1;
-        if (x + l * dx >= 0 && x + l * dx < this.size && y + l * dy >= 0 && y + l * dy < this.size) {
-            if (this.array[x + l * dx][y + l * dy].chip != null) {
-                if (this.array[x + l * dx][y + l * dy].chip.side == "white") {
+        if (this.areCoordsValid(x + l*dx, y + l*dy)) {
+            if (this.board[x + l * dx][y + l * dy].hasChip()) {
+                if (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color)) {
                     l++;
                 } else {
                     continue;
                 }
             }
         }
-        if (l == 2) {
-            while (x + l * dx >= 0 && x + l * dx < this.size && y + l * dy >= 0 && y + l * dy < this.size) {
-                if (this.array[x + l * dx][y + l * dy].chip != null) {
-                    if (this.array[x + l * dx][y + l * dy].chip.side == "black") {
-                        return true;
-                    } else if (this.array[x + l * dx][y + l * dy].chip.side == "white") {
-                        l++;
-                    } else {
-                        break;
-                    }
-                } else { break; }
+        if (l != 2) {
+            continue;
+        }
+        while (this.areCoordsValid(x + l*dx, y + l*dy)) {
+            if (this.board[x + l * dx][y + l * dy].hasChip()) {
+                if (this.board[x + l * dx][y + l * dy].chip.side == color) {
+                    return true;
+                } else if (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color)) {
+                    l++;
+                } else {
+                    break;
+                }
+            } else { 
+                break; 
             }
         }
     }
     return false;
 }
 
+Model.prototype.reverseChips = function (x, y, color) {
+    var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+    for (var k = 0; k < directions.length; k++) {
+        var dx = directions[k][0];
+        var dy = directions[k][1];
+        var l = 1;
+        if (this.areCoordsValid(x + l * dx, y + l * dy)) {
+            if (this.board[x + l * dx][y + l * dy].hasChip()) {
+                if (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color)) {
+                    l++;
+                } else {
+                    continue;
+                }
+            } else {
+                continue;
+            }
+        } else {
+            continue;
+        }        
+        while (this.areCoordsValid(x + l * dx, y + l * dy)) {
+            if (this.board[x + l * dx][y + l * dy].hasChip()) {
+                if (this.board[x + l * dx][y + l * dy].chip.side == color) {
+                    for (var k = 1; k < l; k++) {
+                        this.board[x + k * dx][y + k * dy].chip.reverse();
+                    }
+                    break;
+                } else if (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color)) {
+                    l++;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+}
+
 function View() {
 }
 
-View.prototype.renderModel = function (board) {
-    for (var i = 0; i < board.size; i++) {
-        for (var j = 0; j < board.size; j++) {
-            if (board.getCell(i, j).hasChip()) {
+View.prototype.renderModel = function (model) {
+    for (var i = 0; i < model.size; i++) {
+        for (var j = 0; j < model.size; j++) {
+            if (model.getCell(i, j).hasChip()) {
                 var elem_td = document.getElementById(String(i) + String(j));
                 var img = document.createElement("img");
-                img.src = "images/" + board.getCell(i, j).chip.side + ".gif";
-                img.alt = board.getCell(i, j).chip.side;
+                img.src = "images/" + model.getCell(i, j).chip.side + ".gif";
+                img.alt = model.getCell(i, j).chip.side;
                 if (elem_td.hasChildNodes()) {
                     elem_td.removeChild(elem_td.childNodes[0]);
                 }
@@ -130,14 +190,13 @@ View.prototype.renderModel = function (board) {
 }
 
 function init() {
-    var board = new Board();
-    board.setInitialPositionOfGame();
+    var model = new Model();
+    model.setInitialPositionOfGame();
 
     var view = new View();
-    view.renderModel(board);
+    view.renderModel(model);
 
     var tds = document.getElementsByTagName("td");
-
     for (var i = 0; i < tds.length; i++) {
         tds[i].onclick = firstTurn;
     }
@@ -145,8 +204,12 @@ function init() {
     function firstTurn(obj) {
         var coords = obj.target.getAttribute("id");
         if (coords != null) {
-            board.makeTurn(coords);
-            view.renderModel(board);
+            if (model.turnNo % 2 == 1) {
+                model.makeTurn(coords, "black");
+            } else {
+                model.makeTurn(coords, "white");
+            }
+            view.renderModel(model);
         }
     }
 }
