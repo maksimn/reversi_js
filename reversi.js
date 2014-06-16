@@ -34,6 +34,8 @@ Chip.prototype.setBlack = function () {
 
 function Model() {
     this.turnNo = 1;
+    this.qtyBlacks = 2;
+    this.qtyWhites = 2;
     this.size = 8;
     this.board = new Array(this.size);
     for (var i = 0; i < this.board.length; i++) {
@@ -68,6 +70,8 @@ Model.prototype.makeTurn = function (coords, color) {
         this.setChip(x, y, color);
         this.reverseChips(x, y, color);
         this.turnNo++;
+        this.countBlacks();
+        this.countWhites();
     } 
 }
 
@@ -97,6 +101,9 @@ Model.prototype.inverseColor = function (color) {
 }
 
 Model.prototype.checkIfTheChipCouldBePutInThisCell = function (x, y, color) {
+    if (this.board[x][y].hasChip()) {
+        return false;
+    }
     var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
     for (var k = 0; k < directions.length; k++) {
         var dx = directions[k][0];
@@ -169,6 +176,30 @@ Model.prototype.reverseChips = function (x, y, color) {
     }
 }
 
+Model.prototype.countBlacks = function () {
+    this.qtyBlacks = 0;
+    for (var i = 0; i < this.size; i++) {
+        for (var j = 0; j < this.size; j++) {
+            if (this.board[i][j].hasChip()) {
+                if (this.board[i][j].chip.side == "black")
+                    this.qtyBlacks++;
+            }
+        }
+    }
+}
+
+Model.prototype.countWhites = function () {
+    this.qtyWhites = 0;
+    for (var i = 0; i < this.size; i++) {
+        for (var j = 0; j < this.size; j++) {
+            if (this.board[i][j].hasChip()) {
+                if (this.board[i][j].chip.side == "white")
+                    this.qtyWhites++;
+            }
+        }
+    }
+}
+
 function View() {
 }
 
@@ -187,31 +218,40 @@ View.prototype.renderModel = function (model) {
             }
         }
     }
+    var statElement = document.getElementById("stat");
+    statElement.innerHTML = "black: " + model.qtyBlacks + "<br /> white: " + model.qtyWhites;
 }
 
-function init() {
-    var model = new Model();
-    model.setInitialPositionOfGame();
+function ReversiController() {
+    this.main = function () {
+        function init() {
+            var model = new Model();
+            model.setInitialPositionOfGame();
 
-    var view = new View();
-    view.renderModel(model);
-
-    var tds = document.getElementsByTagName("td");
-    for (var i = 0; i < tds.length; i++) {
-        tds[i].onclick = firstTurn;
-    }
-
-    function firstTurn(obj) {
-        var coords = obj.target.getAttribute("id");
-        if (coords != null) {
-            if (model.turnNo % 2 == 1) {
-                model.makeTurn(coords, "black");
-            } else {
-                model.makeTurn(coords, "white");
-            }
+            var view = new View();
             view.renderModel(model);
+
+            var tds = document.getElementsByTagName("td");
+            for (var i = 0; i < tds.length; i++) {
+                tds[i].onclick = firstTurn;
+            }
+
+            function firstTurn(obj) {
+                var coords = obj.target.getAttribute("id");
+                if (coords != null) {
+                    if (model.turnNo % 2 == 1) {
+                        model.makeTurn(coords, "black");
+                    } else {
+                        model.makeTurn(coords, "white");
+                    }
+                    view.renderModel(model);
+                }
+            }
         }
+
+        window.onload = init;
     }
 }
 
-window.onload = init;
+var reversiController = new ReversiController();
+reversiController.main();
