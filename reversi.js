@@ -13,11 +13,11 @@ Cell.prototype.hasChip = function () {
 }
 
 function Chip() {
-    this.side = undefined;
+    this.side = "white";
 }
 
 Chip.prototype.reverse = function () {
-    if (this.side === "white") {
+    if (this.side == "white") {
         this.side = "black";
     } else {
         this.side = "white";
@@ -160,8 +160,8 @@ Model.prototype.reverseChips = function (x, y, color) {
         while (this.areCoordsValid(x + l * dx, y + l * dy)) {
             if (this.board[x + l * dx][y + l * dy].hasChip()) {
                 if (this.board[x + l * dx][y + l * dy].chip.side == color) {
-                    for (var k = 1; k < l; k++) {
-                        this.board[x + k * dx][y + k * dy].chip.reverse();
+                    for (var a = 1; a < l; a++) {
+                        this.board[x + a * dx][y + a * dy].chip.reverse();
                     }
                     break;
                 } else if (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color)) {
