@@ -32,6 +32,39 @@ Chip.prototype.setBlack = function () {
     this.side = "black";
 }
 
+function AI() {
+    this.color = undefined;
+    this.possibleCells = [];
+    this.numReversed = [];
+}
+
+AI.prototype.setColor = function (color) {
+    this.color = color;
+}
+
+AI.prototype.getPossibleCells = function (model) {
+    for (var i = 0; i < model.size; i++) {
+        for (var j = 0; j < model.size; j++) {
+            if(model.checkIfTheChipCouldBePutInThisCell(i, j, this.color)) {
+                this.possibleCells.push(new Cell(i, j));
+            }
+        }
+    }
+    if (this.possibleCells.length == 0) {
+        alert("Game over!");
+    }
+}
+
+AI.prototype.getNumReversed = function (model) {
+
+}
+
+AI.prototype.getCoordsOfTurn = function () {
+    var x = Math.random() * this.possibleCells.length;
+    var y = Math.floor(x);
+    return String(this.possibleCells[y].x) + String(this.possibleCells[y].y);
+}
+
 function Model() {
     this.turnNo = 1;
     this.qtyBlacks = 2;
@@ -69,6 +102,15 @@ Model.prototype.makeTurn = function (coords, color) {
     if (this.checkIfTheChipCouldBePutInThisCell(x, y, color)) {
         this.setChip(x, y, color);
         this.reverseChips(x, y, color);
+        var ai = new AI();
+        ai.setColor(this.inverseColor(color));
+        ai.getPossibleCells(this);
+        ai.getNumReversed(this);
+        var _coords = ai.getCoordsOfTurn();
+        var xx = parseInt(_coords.charAt(0));
+        var yy = parseInt(_coords.charAt(1));
+        this.setChip(xx, yy, this.inverseColor(color));
+        this.reverseChips(xx, yy, this.inverseColor(color));
         this.turnNo++;
         this.countBlacks();
         this.countWhites();
@@ -233,17 +275,13 @@ function ReversiController() {
 
             var tds = document.getElementsByTagName("td");
             for (var i = 0; i < tds.length; i++) {
-                tds[i].onclick = firstTurn;
+                tds[i].onclick = Turn;
             }
 
-            function firstTurn(obj) {
+            function Turn(obj) {
                 var coords = obj.target.getAttribute("id");
                 if (coords != null) {
-                    if (model.turnNo % 2 == 1) {
-                        model.makeTurn(coords, "black");
-                    } else {
-                        model.makeTurn(coords, "white");
-                    }
+                    model.makeTurn(coords, "black");
                     view.renderModel(model);
                 }
             }
@@ -252,6 +290,7 @@ function ReversiController() {
         window.onload = init;
     }
 }
+
 
 var reversiController = new ReversiController();
 reversiController.main();
