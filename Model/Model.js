@@ -4,7 +4,7 @@ function Model() {
     this.qtyWhites = 2;
     this.size = 8;
     this.board = new Array(this.size);
-    for (var i = 0; i < this.board.length; i++) {
+    for (var i = 0; i < this.size; i++) {
         this.board[i] = new Array(this.size);
     }
     for (var i = 0; i < this.size; i++) {
@@ -81,30 +81,18 @@ Model.prototype.checkIfTheChipCouldBePutInThisCell = function (x, y, color) {
     }
     var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
     for (var k = 0; k < directions.length; k++) {
-        var dx = directions[k][0];
-        var dy = directions[k][1];
+        var dx = directions[k][0], dy = directions[k][1];
         var l = 1;
-        if (this.areCoordsValid(x + l * dx, y + l * dy)) {
-            if (this.board[x + l * dx][y + l * dy].hasChip()) {
-                if (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color)) {
-                    l++;
-                } else {
-                    continue;
-                }
-            }
-        }
+        this.areCoordsValid(x + l * dx, y + l * dy) && this.board[x + l * dx][y + l * dy].hasChip() 
+		&& (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color)) && l++; 
         if (l != 2) {
             continue;
         }
         while (this.areCoordsValid(x + l * dx, y + l * dy)) {
-            if (this.board[x + l * dx][y + l * dy].hasChip()) {
-                if (this.board[x + l * dx][y + l * dy].chip.side == color) {
-                    return true;
-                } else if (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color)) {
-                    l++;
-                } else {
-                    break;
-                }
+            if (this.board[x + l * dx][y + l * dy].hasChip() && (this.board[x + l * dx][y + l * dy].chip.side == color)) {
+                return true;
+            } else if (this.board[x + l * dx][y + l * dy].hasChip() && (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color))) {
+                l++;
             } else {
                 break;
             }
@@ -155,9 +143,8 @@ Model.prototype.countBlacks = function () {
     this.qtyBlacks = 0;
     for (var i = 0; i < this.size; i++) {
         for (var j = 0; j < this.size; j++) {
-            if (this.board[i][j].hasChip()) {
-                if (this.board[i][j].chip.side == "black")
-                    this.qtyBlacks++;
+            if (this.board[i][j].hasChip() && (this.board[i][j].chip.side == "black")) {
+                this.qtyBlacks++;
             }
         }
     }
