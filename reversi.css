@@ -7,13 +7,13 @@ h1 {
     color: gray;
 }
 
-table {
+div#GameBoard table {
 	border: thin solid black;
     background-color: lightgray;
     margin: auto;
 }
 
-td {
+div#GameBoard td {
 	border: thin solid gray;
     width: 54px;
     height: 55px;
