@@ -82,15 +82,15 @@ Model.prototype.checkIfTheChipCouldBePutInThisCell = function (x, y, color) {
     for (var k = 0; k < directions.length; k++) {
         var dx = directions[k][0], dy = directions[k][1];
         var l = 1;
-        this.areCoordsValid(x + l * dx, y + l * dy) && this.board[x + l * dx][y + l * dy].hasChip() 
-		&& (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color)) && l++; 
-        if (l != 2) {
+        if (this.hasChipWithDiffColor(x + l * dx, y + l * dy, color)) {
+            l++;
+        } else {
             continue;
         }
         while (this.areCoordsValid(x + l * dx, y + l * dy)) {
-            if (this.board[x + l * dx][y + l * dy].hasChip() && (this.board[x + l * dx][y + l * dy].chip.side == color)) {
+            if (this.hasChipWithSameColor(x + l * dx, y + l * dy, color)) {
                 return true;
-            } else if (this.board[x + l * dx][y + l * dy].hasChip() && (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color))) {
+            } else if (this.hasChipWithDiffColor(x + l * dx, y + l * dy, color)) {
                 l++;
             } else {
                 break;
@@ -100,24 +100,31 @@ Model.prototype.checkIfTheChipCouldBePutInThisCell = function (x, y, color) {
     return false;
 }
 
+Model.prototype.hasChipWithDiffColor = function (x, y, color) {
+    return this.areCoordsValid(x, y) && this.board[x][y].hasChip() && (this.board[x][y].chip.side == this.inverseColor(color));
+}
+
+Model.prototype.hasChipWithSameColor = function (x, y, color) {
+    return this.areCoordsValid(x, y) && this.board[x][y].hasChip() && (this.board[x][y].chip.side == color);
+}
+
 Model.prototype.reverseChips = function (x, y, color) {
     var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
     for (var k = 0; k < directions.length; k++) {
         var dx = directions[k][0], dy = directions[k][1];
         var l = 1;
-        if (this.areCoordsValid(x + l * dx, y + l * dy) && this.board[x + l * dx][y + l * dy].hasChip()
-            && (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color))) {
+        if (this.hasChipWithDiffColor(x + l * dx, y + l * dy, color)) {
             l++;
         } else {
             continue;
         }
         while (this.areCoordsValid(x + l * dx, y + l * dy)) {
-            if (this.board[x + l * dx][y + l * dy].hasChip() && (this.board[x + l * dx][y + l * dy].chip.side == color)) {
+            if (this.hasChipWithSameColor(x + l*dx, y + l*dy, color)) {
                 for (var a = 1; a < l; a++) {
                     this.board[x + a * dx][y + a * dy].chip.reverse();
                 }
                 break;
-            } else if (this.board[x + l * dx][y + l * dy].hasChip() && (this.board[x + l * dx][y + l * dy].chip.side == this.inverseColor(color))) {
+            } else if (this.hasChipWithDiffColor(x + l * dx, y + l * dy, color)) {
                 l++;
             } else {
                 break;
